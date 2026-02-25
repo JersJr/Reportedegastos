@@ -1,36 +1,1602 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mi Primera Web</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Gastos - Javier & Toshio</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #e6f2ff;
-            font-family: Arial;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
             text-align: center;
-            margin-top: 100px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
+        /* Login */
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 100px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
             cursor: pointer;
+            margin-top: 10px;
         }
-    </style>
 
+        .login-container button:hover {
+            transform: scale(1.02);
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+        }
+
+        /* Contenido principal (oculto hasta login) */
+        #mainContent {
+            display: none;
+        }
+
+        /* Logout */
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 20px;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Tarjetas de saldo */
+        .saldos-principales {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .saldo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .saldo-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .saldo-card.javier { border-top: 5px solid #667eea; }
+        .saldo-card.toshio { border-top: 5px solid #f093fb; }
+        .saldo-card.conjunto { border-top: 5px solid #4facfe; }
+        .saldo-card.ahorros { border-top: 5px solid #ffc107; }
+
+        .saldo-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .saldo-card .monto {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .detalles-saldos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .detalle-item {
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .detalle-item .label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Monto inicial */
+        .monto-inicial-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .monto-inicial-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .monto-inicial-input input {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            width: 200px;
+        }
+
+        .monto-inicial-input button {
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .monto-inicial-input button:hover {
+            transform: scale(1.05);
+        }
+
+        .monto-inicial-input button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .monto-fijo {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        /* Pagos Pendientes de MESES ANTERIORES */
+        .pagos-pendientes {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .pagos-pendientes h2 {
+            color: #856404;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pendientes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .pendiente-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #dc3545;
+        }
+
+        .pendiente-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .pendiente-info .monto {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .btn-pagar-pendiente {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn-pagar-pendiente:hover {
+            transform: scale(1.05);
+        }
+
+        /* Sección de Ahorros Individuales */
+        .ahorros-individuales {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .ahorros-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .ahorro-card {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .ahorro-card.javier { background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; }
+        .ahorro-card.toshio { background: rgba(240, 147, 251, 0.1); border: 2px solid #f093fb; }
+
+        .ahorro-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .ahorro-card .monto-ahorro {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .ahorro-control {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .ahorro-control input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .ahorro-control button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .ahorro-control button.javier { background: #667eea; }
+        .ahorro-control button.toshio { background: #f093fb; }
+
+        /* Sección de Préstamos */
+        .prestamos-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .prestamos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .prestamo-card {
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .prestamo-card.javier { border-left: 5px solid #667eea; }
+        .prestamo-card.toshio { border-left: 5px solid #f093fb; }
+        .prestamo-card.otros { border-left: 5px solid #6f42c1; }
+
+        .prestamo-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .prestamo-total {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .prestamo-lista {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+
+        .prestamo-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .btn-pagar-prestamo {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        /* Formulario principal */
+        .formulario-principal {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tipo-movimiento {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .tipo-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #333;
+        }
+
+        .tipo-btn.activo {
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .tipo-btn.deposito.activo { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .tipo-btn.pago.activo { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
+        .tipo-btn.banco.activo { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+        .tipo-btn.prestamo.activo { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
+
+        .campos-movimiento {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .campo-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .campo-group select, .campo-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        .btn-registrar {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .btn-registrar.deposito { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .btn-registrar.pago { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
+        .btn-registrar.banco { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+        .btn-registrar.prestamo { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
+
+        .btn-registrar:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Gráfica de comparación */
+        .grafica-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .grafica-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 200px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .barra-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+        }
+
+        .barra {
+            width: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px 10px 0 0;
+            transition: height 0.3s;
+            position: relative;
+        }
+
+        .barra.depositos { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .barra.gastos { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
+        .barra.ahorros { background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); }
+
+        .barra-label {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .barra-valor {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .leyenda {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leyenda-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .leyenda-color.depositos { background: #28a745; }
+        .leyenda-color.gastos { background: #dc3545; }
+        .leyenda-color.ahorros { background: #ffc107; }
+
+        /* Historial de Cierres */
+        .historial-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .historial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .historial-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 5px solid #4facfe;
+        }
+
+        .historial-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .historial-detalle {
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        /* Resumen Mensual */
+        .resumen-mensual {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .resumen-detalle {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .conceptos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .concepto-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 5px solid #6c757d;
+        }
+
+        .concepto-card.pagado-completo { border-left-color: #28a745; }
+        .concepto-card.con-excedente { border-left-color: #ffc107; }
+        .concepto-card.faltante { border-left-color: #dc3545; }
+
+        .concepto-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .concepto-detalle {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.95em;
+        }
+
+        .alerta-20 {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .resumen-global {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .resumen-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+            border-top: 2px solid #333;
+        }
+
+        /* Tabla de movimientos */
+        .tabla-gastos {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .oculto {
+            display: none !important;
+        }
+
+        .text-success { color: #28a745; }
+        .text-danger { color: #dc3545; }
+        .text-warning { color: #ffc107; }
+        .text-primary { color: #667eea; }
+        .text-info { color: #f093fb; }
+        .text-purple { color: #6f42c1; }
+    </style>
 </head>
 <body>
+    <!-- Login -->
+    <div id="loginContainer" class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+        <div id="loginError" class="error"></div>
+    </div>
 
-    <h1>Mi Web de Prueba 🚀</h1>
-    <p>Si ves esto online, funcionó.</p>
+    <!-- Contenido principal -->
+    <div id="mainContent" class="container">
+        <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        <h1>💰 Control de Gastos - Javier & Toshio</h1>
 
-    <button onclick="saludo()">Haz clic</button>
+        <!-- Monto Inicial -->
+        <div class="monto-inicial-card">
+            <div>
+                <h2>🏦 Saldo Conjunto Inicial</h2>
+                <p class="monto-fijo" id="montoFijoDisplay">$0.00</p>
+            </div>
+            <div class="monto-inicial-input" id="montoInicialSection">
+                <input type="number" id="montoInicial" placeholder="Ingrese saldo inicial" step="0.01" min="0">
+                <button onclick="establecerMontoInicial()" id="btnEstablecerMonto">Establecer</button>
+            </div>
+        </div>
+
+        <!-- Pagos Pendientes de MESES ANTERIORES -->
+        <div class="pagos-pendientes" id="pagosPendientesSection" style="display: none;">
+            <h2>⚠️ Pagos Pendientes de Meses Anteriores</h2>
+            <div class="pendientes-grid" id="pendientesContainer"></div>
+        </div>
+
+        <!-- Tarjetas de Saldos Principales -->
+        <div class="saldos-principales">
+            <div class="saldo-card javier">
+                <h3>Javier</h3>
+                <div class="monto" id="saldoJavier">$0.00</div>
+                <div class="detalles-saldos">
+                    <div class="detalle-item">
+                        <span class="label">Debe pagar/mes</span>
+                        <span>$374.88</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Depositado</span>
+                        <span id="depositadoJavier">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Ahorro</span>
+                        <span id="ahorroJavierCard" class="text-primary">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Préstamos</span>
+                        <span id="prestamosJavierCard" class="text-purple">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="saldo-card toshio">
+                <h3>Toshio</h3>
+                <div class="monto" id="saldoToshio">$0.00</div>
+                <div class="detalles-saldos">
+                    <div class="detalle-item">
+                        <span class="label">Debe pagar/mes</span>
+                        <span>$491.06</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Depositado</span>
+                        <span id="depositadoToshio">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Ahorro</span>
+                        <span id="ahorroToshioCard" class="text-info">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Préstamos</span>
+                        <span id="prestamosToshioCard" class="text-purple">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="saldo-card conjunto">
+                <h3>Conjunto</h3>
+                <div class="monto" id="saldoConjunto">$0.00</div>
+                <div class="detalles-saldos">
+                    <div class="detalle-item">
+                        <span class="label">Saldo Banco</span>
+                        <span id="saldoBanco">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Disponible gastos</span>
+                        <span id="disponibleGastos">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Total Gastos</span>
+                        <span id="totalGastos">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="saldo-card ahorros">
+                <h3>Ahorros</h3>
+                <div class="monto" id="ahorroTotal">$0.00</div>
+                <div class="detalles-saldos">
+                    <div class="detalle-item">
+                        <span class="label">Javier</span>
+                        <span id="ahorroJavierTotal" class="text-primary">$0.00</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="label">Toshio</span>
+                        <span id="ahorroToshioTotal" class="text-info">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Ahorros Individuales -->
+        <div class="ahorros-individuales">
+            <h2>💰 Ahorros Individuales</h2>
+            <div class="ahorros-grid">
+                <div class="ahorro-card javier">
+                    <h4>Javier</h4>
+                    <div class="monto-ahorro" id="ahorroJavierIndividual">$0.00</div>
+                    <div class="ahorro-control">
+                        <input type="number" id="retiroJavier" placeholder="Monto a retirar" step="0.01" min="0">
+                        <button class="javier" onclick="retirarAhorroIndividual('javier')">Retirar</button>
+                    </div>
+                </div>
+                <div class="ahorro-card toshio">
+                    <h4>Toshio</h4>
+                    <div class="monto-ahorro" id="ahorroToshioIndividual">$0.00</div>
+                    <div class="ahorro-control">
+                        <input type="number" id="retiroToshio" placeholder="Monto a retirar" step="0.01" min="0">
+                        <button class="toshio" onclick="retirarAhorroIndividual('toshio')">Retirar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Préstamos -->
+        <div class="prestamos-section">
+            <h2>💰 Préstamos (Cuentas por Cobrar)</h2>
+            <div class="prestamos-grid">
+                <div class="prestamo-card javier">
+                    <h4>Javier</h4>
+                    <div class="prestamo-total" id="prestamosJavierTotal">$0.00</div>
+                    <div class="prestamo-lista" id="prestamosJavierLista"></div>
+                </div>
+                <div class="prestamo-card toshio">
+                    <h4>Toshio</h4>
+                    <div class="prestamo-total" id="prestamosToshioTotal">$0.00</div>
+                    <div class="prestamo-lista" id="prestamosToshioLista"></div>
+                </div>
+                <div class="prestamo-card otros">
+                    <h4>Otros</h4>
+                    <div class="prestamo-total" id="prestamosOtrosTotal">$0.00</div>
+                    <div class="prestamo-lista" id="prestamosOtrosLista"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario Principal -->
+        <div class="formulario-principal">
+            <h2>📝 Registrar Movimiento</h2>
+            
+            <div class="tipo-movimiento">
+                <button class="tipo-btn deposito activo" onclick="seleccionarTipo('deposito', this)">💰 Depósito</button>
+                <button class="tipo-btn pago" onclick="seleccionarTipo('pago', this)">💸 Pago</button>
+                <button class="tipo-btn banco" onclick="seleccionarTipo('banco', this)">🏦 Banco</button>
+                <button class="tipo-btn prestamo" onclick="seleccionarTipo('prestamo', this)">💰 Préstamo</button>
+            </div>
+
+            <!-- Campos para Depósito -->
+            <div id="camposDeposito">
+                <div class="campos-movimiento">
+                    <div class="campo-group">
+                        <label>📅 Fecha:</label>
+                        <input type="date" id="fechaDeposito">
+                    </div>
+                    <div class="campo-group">
+                        <label>👤 Persona:</label>
+                        <select id="personaDeposito">
+                            <option value="javier">Javier</option>
+                            <option value="toshio">Toshio</option>
+                        </select>
+                    </div>
+                    <div class="campo-group">
+                        <label>📆 Quincena:</label>
+                        <select id="quincenaDeposito">
+                            <option value="1">Primera Quincena</option>
+                            <option value="2">Segunda Quincena</option>
+                        </select>
+                    </div>
+                    <div class="campo-group">
+                        <label>💰 Monto:</label>
+                        <input type="number" id="montoDeposito" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="btn-registrar deposito" onclick="registrarDeposito()">Registrar Depósito</button>
+            </div>
+
+            <!-- Campos para Pago -->
+            <div id="camposPago" class="oculto">
+                <div class="campos-movimiento">
+                    <div class="campo-group">
+                        <label>📅 Fecha:</label>
+                        <input type="date" id="fechaPago">
+                    </div>
+                    <div class="campo-group">
+                        <label>📋 Concepto:</label>
+                        <select id="conceptoPago">
+                            <option value="casa">Casa</option>
+                            <option value="carro">Carro</option>
+                            <option value="prestamo">Préstamo</option>
+                            <option value="luz">Luz</option>
+                            <option value="agua">Agua</option>
+                            <option value="basura">Basura</option>
+                            <option value="telefono">Teléfono</option>
+                            <option value="seguro">Seguro</option>
+                            <option value="internet">Internet</option>
+                            <option value="perros">Perros</option>
+                        </select>
+                    </div>
+                    <div class="campo-group">
+                        <label>💰 Monto:</label>
+                        <input type="number" id="montoPago" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="btn-registrar pago" onclick="registrarPago()">Registrar Pago</button>
+            </div>
+
+            <!-- Campos para Banco -->
+            <div id="camposBanco" class="oculto">
+                <div class="campos-movimiento">
+                    <div class="campo-group">
+                        <label>📅 Fecha:</label>
+                        <input type="date" id="fechaBanco">
+                    </div>
+                    <div class="campo-group">
+                        <label>🏦 Tipo:</label>
+                        <select id="tipoBanco" onchange="toggleBancoField()">
+                            <option value="interes">💰 Interés (Aumenta saldo)</option>
+                            <option value="gasto">💸 Gasto Bancario (Disminuye saldo)</option>
+                        </select>
+                    </div>
+                    <div class="campo-group">
+                        <label>💰 Monto:</label>
+                        <input type="number" id="montoBanco" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="btn-registrar banco" onclick="registrarBanco()">Registrar Movimiento Bancario</button>
+            </div>
+
+            <!-- Campos para Préstamo -->
+            <div id="camposPrestamo" class="oculto">
+                <div class="campos-movimiento">
+                    <div class="campo-group">
+                        <label>📅 Fecha:</label>
+                        <input type="date" id="fechaPrestamo">
+                    </div>
+                    <div class="campo-group">
+                        <label>👤 A quien presta:</label>
+                        <select id="tipoPrestamo" onchange="togglePrestamoField()">
+                            <option value="javier">Javier</option>
+                            <option value="toshio">Toshio</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="campo-group" id="nombrePrestamoField" style="display: none;">
+                        <label>📝 Nombre:</label>
+                        <input type="text" id="nombrePrestamo" placeholder="Nombre de la persona">
+                    </div>
+                    <div class="campo-group">
+                        <label>💰 Monto:</label>
+                        <input type="number" id="montoPrestamo" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                </div>
+                <button class="btn-registrar prestamo" onclick="registrarPrestamo()">Registrar Préstamo</button>
+            </div>
+        </div>
+
+        <!-- Gráfica de Comparación -->
+        <div class="grafica-section">
+            <h2>📊 Comparativa Depósitos vs Gastos</h2>
+            <div class="grafica-container">
+                <div class="barra-container">
+                    <div class="barra depositos" id="barraDepositos" style="height: 0px;"></div>
+                    <div class="barra-label">Depósitos</div>
+                    <div class="barra-valor" id="totalDepositos">$0.00</div>
+                </div>
+                <div class="barra-container">
+                    <div class="barra gastos" id="barraGastos" style="height: 0px;"></div>
+                    <div class="barra-label">Gastos</div>
+                    <div class="barra-valor" id="totalGastosGrafica">$0.00</div>
+                </div>
+                <div class="barra-container">
+                    <div class="barra ahorros" id="barraAhorros" style="height: 0px;"></div>
+                    <div class="barra-label">Ahorros</div>
+                    <div class="barra-valor" id="totalAhorrosGrafica">$0.00</div>
+                </div>
+            </div>
+            <div class="leyenda">
+                <div class="leyenda-item">
+                    <div class="leyenda-color depositos"></div>
+                    <span>Depósitos Totales</span>
+                </div>
+                <div class="leyenda-item">
+                    <div class="leyenda-color gastos"></div>
+                    <span>Gastos Totales</span>
+                </div>
+                <div class="leyenda-item">
+                    <div class="leyenda-color ahorros"></div>
+                    <span>Ahorros Acumulados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Cierres -->
+        <div class="historial-section">
+            <h2>📅 Historial de Cierres Mensuales</h2>
+            <div class="historial-grid" id="historialContainer"></div>
+        </div>
+
+        <!-- Resumen Mensual Detallado -->
+        <div class="resumen-mensual">
+            <h2>📊 Resumen del Mes Actual</h2>
+            <div class="resumen-detalle">
+                <div class="conceptos-grid" id="conceptosResumen"></div>
+                <div class="resumen-global">
+                    <h3>Resumen Global</h3>
+                    <div id="resumenGlobal"></div>
+                </div>
+            </div>
+            <button class="btn-registrar" style="margin-top: 20px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" onclick="cerrarMes()">📅 Cerrar Mes y Ver Resumen</button>
+        </div>
+
+        <!-- Tabla de Movimientos -->
+        <div class="tabla-gastos">
+            <h2>📋 Historial de Movimientos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Concepto</th>
+                        <th>Detalle</th>
+                        <th>Monto</th>
+                        <th>Javier</th>
+                        <th>Toshio</th>
+                    </tr>
+                </thead>
+                <tbody id="movimientosBody"></tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
-        function saludo() {
-            alert("GitHub Pages está funcionando correctamente.");
+        // ==================== LOGIN ====================
+        const USUARIOS = {
+            javier: 'jav2385',
+            toshio: 'tss8127'
+        };
+
+        function login() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            if (USUARIOS[user] && USUARIOS[user] === pass) {
+                localStorage.setItem('loggedUser', user);
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                cargarDatos();
+            } else {
+                document.getElementById('loginError').innerText = 'Usuario o contraseña incorrectos';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedUser');
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        // Verificar sesión al cargar
+        window.onload = function() {
+            if (localStorage.getItem('loggedUser')) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                cargarDatos();
+            } else {
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+            }
+            // Fechas por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaDeposito').value = hoy;
+            document.getElementById('fechaPago').value = hoy;
+            document.getElementById('fechaBanco').value = hoy;
+            document.getElementById('fechaPrestamo').value = hoy;
+        };
+
+        // ==================== CONFIGURACIÓN ====================
+        const GASTOS_FIJOS = {
+            casa: { nombre: 'Casa', javier: 50, toshio: 50, montoMensual: 233.87 },
+            carro: { nombre: 'Carro', javier: 50, toshio: 50, montoMensual: 228 },
+            prestamo: { nombre: 'Préstamo', javier: 50, toshio: 50, montoMensual: 138.86 },
+            luz: { nombre: 'Luz', javier: 50, toshio: 50, montoMensual: 34 },
+            agua: { nombre: 'Agua', javier: 50, toshio: 50, montoMensual: 7 },
+            basura: { nombre: 'Basura', javier: 50, toshio: 50, montoMensual: 20 },
+            telefono: { nombre: 'Teléfono', javier: 0, toshio: 100, montoMensual: 39 },
+            seguro: { nombre: 'Seguro', javier: 0, toshio: 100, montoMensual: 77.18 },
+            internet: { nombre: 'Internet', javier: 50, toshio: 50, montoMensual: 34 },
+            perros: { nombre: 'Perros', javier: 50, toshio: 50, montoMensual: 54.03 }
+        };
+
+        const TOTALES_PERSONA = {
+            javier: 374.88,
+            toshio: 491.06
+        };
+
+        // Estado inicial
+        let estado = {
+            montoInicial: 0,
+            saldoActual: 0,
+            depositos: { javier: 0, toshio: 0 },
+            gastos: { total: 0, porConcepto: {} },
+            ahorro: { javier: 0, toshio: 0 },
+            prestamos: { javier: [], toshio: [], otros: [] },
+            conceptos: {},
+            pendientesMesesAnteriores: [],
+            historialCierres: [], // Nuevo array para guardar los resúmenes
+            movimientos: []
+        };
+
+        // Inicializar conceptos
+        Object.keys(GASTOS_FIJOS).forEach(concepto => {
+            estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
+        });
+
+        // ==================== FUNCIONES DE PERSISTENCIA ====================
+        function cargarDatos() {
+            const guardado = localStorage.getItem('controlGastosV12');
+            if (guardado) {
+                estado = JSON.parse(guardado);
+                actualizarUI();
+            }
+        }
+
+        function guardarDatos() {
+            localStorage.setItem('controlGastosV12', JSON.stringify(estado));
+        }
+
+        // ==================== FUNCIONES DE INTERFAZ ====================
+        function seleccionarTipo(tipo, boton) {
+            document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.remove('activo'));
+            boton.classList.add('activo');
+            document.getElementById('camposDeposito').classList.add('oculto');
+            document.getElementById('camposPago').classList.add('oculto');
+            document.getElementById('camposBanco').classList.add('oculto');
+            document.getElementById('camposPrestamo').classList.add('oculto');
+            if (tipo === 'deposito') document.getElementById('camposDeposito').classList.remove('oculto');
+            else if (tipo === 'pago') document.getElementById('camposPago').classList.remove('oculto');
+            else if (tipo === 'banco') document.getElementById('camposBanco').classList.remove('oculto');
+            else if (tipo === 'prestamo') document.getElementById('camposPrestamo').classList.remove('oculto');
+        }
+
+        function toggleBancoField() {}
+        function togglePrestamoField() {
+            const tipo = document.getElementById('tipoPrestamo').value;
+            document.getElementById('nombrePrestamoField').style.display = tipo === 'otros' ? 'block' : 'none';
+        }
+
+        // ==================== FUNCIONES DE NEGOCIO ====================
+        function establecerMontoInicial() {
+            if (estado.montoInicial > 0) {
+                alert('El monto inicial ya fue establecido y no se puede modificar');
+                return;
+            }
+            const monto = parseFloat(document.getElementById('montoInicial').value);
+            if (isNaN(monto) || monto <= 0) {
+                alert('Ingrese un monto válido mayor a 0');
+                return;
+            }
+            estado.montoInicial = monto;
+            estado.saldoActual = monto;
+            document.getElementById('btnEstablecerMonto').disabled = true;
+            document.getElementById('montoInicial').disabled = true;
+            guardarDatos();
+            actualizarUI();
+            alert('Saldo inicial establecido correctamente');
+        }
+
+        function registrarDeposito() {
+            if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
+            const fecha = document.getElementById('fechaDeposito').value;
+            const persona = document.getElementById('personaDeposito').value;
+            const quincena = document.getElementById('quincenaDeposito').value;
+            const monto = parseFloat(document.getElementById('montoDeposito').value);
+            if (!fecha || isNaN(monto) || monto <= 0) { alert('Complete todos los campos'); return; }
+
+            estado.depositos[persona] += monto;
+            estado.saldoActual += monto;
+            const debePagar = TOTALES_PERSONA[persona];
+            if (estado.depositos[persona] > debePagar) {
+                const excedente = estado.depositos[persona] - debePagar;
+                estado.ahorro[persona] += excedente;
+                estado.depositos[persona] = debePagar;
+            }
+
+            estado.movimientos.push({
+                fecha, tipo: 'DEPÓSITO', concepto: persona === 'javier' ? 'Javier' : 'Toshio',
+                detalle: `${quincena}ra Quincena`, monto,
+                javier: persona === 'javier' ? monto : 0,
+                toshio: persona === 'toshio' ? monto : 0
+            });
+            guardarDatos();
+            actualizarUI();
+            document.getElementById('montoDeposito').value = '';
+            alert('Depósito registrado');
+        }
+
+        function registrarPago() {
+            if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
+            const fecha = document.getElementById('fechaPago').value;
+            const concepto = document.getElementById('conceptoPago').value;
+            const monto = parseFloat(document.getElementById('montoPago').value);
+            if (!fecha || isNaN(monto) || monto <= 0) { alert('Complete todos los campos'); return; }
+
+            const gasto = GASTOS_FIJOS[concepto];
+            if (!estado.conceptos[concepto]) estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
+            estado.conceptos[concepto].pagado += monto;
+            estado.conceptos[concepto].diferencia = estado.conceptos[concepto].pagado - gasto.montoMensual;
+            estado.gastos.total += monto;
+            estado.saldoActual -= monto;
+
+            estado.movimientos.push({
+                fecha, tipo: 'PAGO', concepto: gasto.nombre, detalle: 'Mensual', monto,
+                javier: (gasto.javier / 100) * monto,
+                toshio: (gasto.toshio / 100) * monto
+            });
+            guardarDatos();
+            actualizarUI();
+            document.getElementById('montoPago').value = '';
+            alert('Pago registrado');
+        }
+
+        function registrarBanco() {
+            if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
+            const fecha = document.getElementById('fechaBanco').value;
+            const tipo = document.getElementById('tipoBanco').value;
+            const monto = parseFloat(document.getElementById('montoBanco').value);
+            if (!fecha || isNaN(monto) || monto <= 0) { alert('Complete todos los campos'); return; }
+
+            if (tipo === 'interes') {
+                estado.saldoActual += monto;
+                estado.movimientos.push({ fecha, tipo: 'INTERÉS BANCARIO', concepto: 'Interés', detalle: '➕ Aumenta', monto, javier: 0, toshio: 0 });
+            } else {
+                estado.saldoActual -= monto;
+                estado.movimientos.push({ fecha, tipo: 'GASTO BANCARIO', concepto: 'Gasto', detalle: '➖ Disminuye', monto, javier: 0, toshio: 0 });
+            }
+            guardarDatos();
+            actualizarUI();
+            document.getElementById('montoBanco').value = '';
+            alert('Movimiento bancario registrado');
+        }
+
+        function registrarPrestamo() {
+            if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
+            const fecha = document.getElementById('fechaPrestamo').value;
+            const tipo = document.getElementById('tipoPrestamo').value;
+            const monto = parseFloat(document.getElementById('montoPrestamo').value);
+            const nombre = tipo === 'otros' ? document.getElementById('nombrePrestamo').value : '';
+            if (!fecha || isNaN(monto) || monto <= 0) { alert('Complete los campos'); return; }
+            if (tipo === 'otros' && !nombre) { alert('Ingrese el nombre'); return; }
+
+            const prestamoInfo = { fecha, monto, nombre: nombre || (tipo === 'javier' ? 'Javier' : 'Toshio') };
+            if (tipo === 'javier') estado.prestamos.javier.push(prestamoInfo);
+            else if (tipo === 'toshio') estado.prestamos.toshio.push(prestamoInfo);
+            else estado.prestamos.otros.push(prestamoInfo);
+            estado.saldoActual -= monto;
+
+            estado.movimientos.push({
+                fecha, tipo: 'PRÉSTAMO', concepto: `Préstamo a ${prestamoInfo.nombre}`,
+                detalle: tipo === 'otros' ? nombre : `a ${tipo}`, monto,
+                javier: tipo === 'javier' ? monto : 0,
+                toshio: tipo === 'toshio' ? monto : 0
+            });
+            guardarDatos();
+            actualizarUI();
+            document.getElementById('montoPrestamo').value = '';
+            document.getElementById('nombrePrestamo').value = '';
+            document.getElementById('nombrePrestamoField').style.display = 'none';
+            alert('Préstamo registrado');
+        }
+
+        function pagarPrestamo(tipo, index) {
+            let prestamo;
+            if (tipo === 'javier') { prestamo = estado.prestamos.javier[index]; estado.prestamos.javier.splice(index, 1); }
+            else if (tipo === 'toshio') { prestamo = estado.prestamos.toshio[index]; estado.prestamos.toshio.splice(index, 1); }
+            else { prestamo = estado.prestamos.otros[index]; estado.prestamos.otros.splice(index, 1); }
+            estado.saldoActual += prestamo.monto;
+            estado.movimientos.push({
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: 'PAGO PRÉSTAMO',
+                concepto: `Devolución de ${prestamo.nombre}`,
+                detalle: 'Pago de préstamo',
+                monto: prestamo.monto,
+                javier: tipo === 'javier' ? prestamo.monto : 0,
+                toshio: tipo === 'toshio' ? prestamo.monto : 0
+            });
+            guardarDatos();
+            actualizarUI();
+            alert('Pago de préstamo registrado');
+        }
+
+        function pagarPendiente(concepto) {
+            const gasto = GASTOS_FIJOS[concepto];
+            const pendiente = estado.pendientesMesesAnteriores.find(p => p.concepto === concepto);
+            if (!pendiente) return;
+            const montoPagar = pendiente.monto;
+            if (!estado.conceptos[concepto]) estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
+            estado.conceptos[concepto].pagado += montoPagar;
+            estado.conceptos[concepto].diferencia = estado.conceptos[concepto].pagado - gasto.montoMensual;
+            estado.gastos.total += montoPagar;
+            estado.saldoActual -= montoPagar;
+            estado.pendientesMesesAnteriores = estado.pendientesMesesAnteriores.filter(p => p.concepto !== concepto);
+            estado.movimientos.push({
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: 'PAGO PENDIENTE',
+                concepto: gasto.nombre,
+                detalle: 'Mes anterior',
+                monto: montoPagar,
+                javier: (gasto.javier / 100) * montoPagar,
+                toshio: (gasto.toshio / 100) * montoPagar
+            });
+            guardarDatos();
+            actualizarUI();
+            alert(`Pago de ${gasto.nombre} de mes anterior realizado`);
+        }
+
+        function retirarAhorroIndividual(persona) {
+            let monto, input;
+            if (persona === 'javier') {
+                input = document.getElementById('retiroJavier');
+                monto = parseFloat(input.value);
+                if (isNaN(monto) || monto <= 0) { alert('Ingrese monto válido'); return; }
+                if (monto > estado.ahorro.javier) { alert(`Javier solo tiene $${estado.ahorro.javier.toFixed(2)} de ahorro`); return; }
+                estado.ahorro.javier -= monto;
+                estado.saldoActual += monto;
+            } else {
+                input = document.getElementById('retiroToshio');
+                monto = parseFloat(input.value);
+                if (isNaN(monto) || monto <= 0) { alert('Ingrese monto válido'); return; }
+                if (monto > estado.ahorro.toshio) { alert(`Toshio solo tiene $${estado.ahorro.toshio.toFixed(2)} de ahorro`); return; }
+                estado.ahorro.toshio -= monto;
+                estado.saldoActual += monto;
+            }
+            estado.movimientos.push({
+                fecha: new Date().toISOString().split('T')[0],
+                tipo: 'RETIRO AHORRO',
+                concepto: `Retiro ahorro ${persona}`,
+                detalle: '',
+                monto,
+                javier: persona === 'javier' ? monto : 0,
+                toshio: persona === 'toshio' ? monto : 0
+            });
+            guardarDatos();
+            actualizarUI();
+            input.value = '';
+            alert(`Retiro de ahorro de ${persona} realizado`);
+        }
+
+        // Cerrar mes con guardado en historial
+        function cerrarMes() {
+            const mes = prompt("Ingrese el mes que está cerrando (ejemplo: 1 para Enero, 2 para Febrero, etc.):");
+            if (!mes) return;
+            const año = prompt("Ingrese el año (ejemplo: 2025):");
+            if (!año) return;
+            const mesNombre = new Date(año, mes-1, 1).toLocaleString('es', { month: 'long' });
+            if (!confirm(`¿Cerrar mes de ${mesNombre} ${año}?`)) return;
+
+            const totalDepositos = estado.depositos.javier + estado.depositos.toshio;
+            const totalGastos = estado.gastos.total;
+            const totalAhorros = estado.ahorro.javier + estado.ahorro.toshio;
+            const totalPrestamosJavier = estado.prestamos.javier.reduce((s, p) => s + p.monto, 0);
+            const totalPrestamosToshio = estado.prestamos.toshio.reduce((s, p) => s + p.monto, 0);
+            const totalPrestamosOtros = estado.prestamos.otros.reduce((s, p) => s + p.monto, 0);
+            const totalPrestamos = totalPrestamosJavier + totalPrestamosToshio + totalPrestamosOtros;
+
+            const conceptosConExcedente = [], conceptosConFaltante = [];
+            Object.entries(estado.conceptos).forEach(([key, value]) => {
+                if (value.diferencia > 0) conceptosConExcedente.push(`${GASTOS_FIJOS[key].nombre}: +$${value.diferencia.toFixed(2)}`);
+                else if (value.diferencia < 0) conceptosConFaltante.push(`${GASTOS_FIJOS[key].nombre}: -$${Math.abs(value.diferencia).toFixed(2)}`);
+            });
+
+            const noPagados = [];
+            Object.entries(estado.conceptos).forEach(([key, value]) => {
+                if (value.pagado === 0) {
+                    noPagados.push({ concepto: key, nombre: GASTOS_FIJOS[key].nombre, monto: GASTOS_FIJOS[key].montoMensual });
+                }
+            });
+            estado.pendientesMesesAnteriores = noPagados;
+
+            // Crear objeto resumen para historial
+            const resumenHistorial = {
+                fecha: new Date().toISOString(),
+                mes: mesNombre,
+                año,
+                totalDepositos,
+                totalGastos,
+                totalAhorros,
+                totalPrestamos,
+                saldoFinal: estado.saldoActual,
+                detallesConceptos: Object.entries(estado.conceptos).map(([key, val]) => ({
+                    concepto: GASTOS_FIJOS[key].nombre,
+                    pagado: val.pagado,
+                    diferencia: val.diferencia
+                }))
+            };
+            estado.historialCierres.push(resumenHistorial);
+
+            // Resumen para mostrar en alert
+            const resumen = `
+📊 CIERRE DE MES: ${mesNombre} ${año}
+
+💰 DEPÓSITOS DEL MES:
+   Javier: $${estado.depositos.javier.toFixed(2)} de $374.88
+   Toshio: $${estado.depositos.toshio.toFixed(2)} de $491.06
+   Total Depositado: $${totalDepositos.toFixed(2)}
+
+💸 GASTOS DEL MES:
+   Total Gastado: $${totalGastos.toFixed(2)}
+
+💰 AHORROS ACUMULADOS:
+   Javier: $${estado.ahorro.javier.toFixed(2)}
+   Toshio: $${estado.ahorro.toshio.toFixed(2)}
+   Total Ahorros: $${totalAhorros.toFixed(2)}
+
+💰 PRÉSTAMOS:
+   Javier: $${totalPrestamosJavier.toFixed(2)}
+   Toshio: $${totalPrestamosToshio.toFixed(2)}
+   Otros: $${totalPrestamosOtros.toFixed(2)}
+   Total Préstamos: $${totalPrestamos.toFixed(2)}
+
+📈 EXCEDENTES: ${conceptosConExcedente.length ? conceptosConExcedente.join(', ') : 'Ninguno'}
+📉 FALTANTES: ${conceptosConFaltante.length ? conceptosConFaltante.join(', ') : 'Ninguno'}
+
+⚠️ NO PAGADOS (pasan al próximo mes):
+${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`).join('\n') : '   Todos pagados'}
+
+📊 COMPARATIVA: Depósitos - Gastos = $${(totalDepositos - totalGastos).toFixed(2)}
+💰 SALDO FINAL EN BANCO: $${estado.saldoActual.toFixed(2)}
+            `;
+            alert(resumen);
+
+            // Reiniciar para el nuevo mes
+            estado.depositos.javier = 0;
+            estado.depositos.toshio = 0;
+            estado.gastos.total = 0;
+            Object.keys(estado.conceptos).forEach(concepto => {
+                estado.conceptos[concepto].pagado = 0;
+                estado.conceptos[concepto].diferencia = 0;
+            });
+            estado.montoInicial = estado.saldoActual;
+
+            guardarDatos();
+            actualizarUI();
+        }
+
+        function actualizarUI() {
+            const totalDepositos = estado.depositos.javier + estado.depositos.toshio;
+            const totalAhorros = estado.ahorro.javier + estado.ahorro.toshio;
+            const totalPrestamosJavier = estado.prestamos.javier.reduce((s, p) => s + p.monto, 0);
+            const totalPrestamosToshio = estado.prestamos.toshio.reduce((s, p) => s + p.monto, 0);
+            const totalPrestamosOtros = estado.prestamos.otros.reduce((s, p) => s + p.monto, 0);
+            const disponibleGastos = estado.saldoActual - totalAhorros;
+
+            // Tarjetas
+            document.getElementById('montoFijoDisplay').textContent = `$${estado.montoInicial.toFixed(2)}`;
+            document.getElementById('saldoJavier').textContent = `$${(estado.depositos.javier - TOTALES_PERSONA.javier + estado.ahorro.javier).toFixed(2)}`;
+            document.getElementById('depositadoJavier').textContent = `$${estado.depositos.javier.toFixed(2)}`;
+            document.getElementById('ahorroJavierCard').textContent = `$${estado.ahorro.javier.toFixed(2)}`;
+            document.getElementById('prestamosJavierCard').textContent = `$${totalPrestamosJavier.toFixed(2)}`;
+            document.getElementById('saldoToshio').textContent = `$${(estado.depositos.toshio - TOTALES_PERSONA.toshio + estado.ahorro.toshio).toFixed(2)}`;
+            document.getElementById('depositadoToshio').textContent = `$${estado.depositos.toshio.toFixed(2)}`;
+            document.getElementById('ahorroToshioCard').textContent = `$${estado.ahorro.toshio.toFixed(2)}`;
+            document.getElementById('prestamosToshioCard').textContent = `$${totalPrestamosToshio.toFixed(2)}`;
+            document.getElementById('saldoConjunto').textContent = `$${estado.saldoActual.toFixed(2)}`;
+            document.getElementById('saldoBanco').textContent = `$${estado.saldoActual.toFixed(2)}`;
+            document.getElementById('disponibleGastos').textContent = `$${disponibleGastos.toFixed(2)}`;
+            document.getElementById('totalGastos').textContent = `$${estado.gastos.total.toFixed(2)}`;
+            document.getElementById('ahorroTotal').textContent = `$${totalAhorros.toFixed(2)}`;
+            document.getElementById('ahorroJavierTotal').textContent = `$${estado.ahorro.javier.toFixed(2)}`;
+            document.getElementById('ahorroToshioTotal').textContent = `$${estado.ahorro.toshio.toFixed(2)}`;
+
+            // Ahorros individuales
+            document.getElementById('ahorroJavierIndividual').textContent = `$${estado.ahorro.javier.toFixed(2)}`;
+            document.getElementById('ahorroToshioIndividual').textContent = `$${estado.ahorro.toshio.toFixed(2)}`;
+
+            // Préstamos totales
+            document.getElementById('prestamosJavierTotal').textContent = `$${totalPrestamosJavier.toFixed(2)}`;
+            document.getElementById('prestamosToshioTotal').textContent = `$${totalPrestamosToshio.toFixed(2)}`;
+            document.getElementById('prestamosOtrosTotal').textContent = `$${totalPrestamosOtros.toFixed(2)}`;
+
+            // Listas de préstamos
+            document.getElementById('prestamosJavierLista').innerHTML = estado.prestamos.javier.length 
+                ? estado.prestamos.javier.map((p, i) => `<div class="prestamo-item"><span>${p.fecha} - $${p.monto.toFixed(2)}</span><button class="btn-pagar-prestamo" onclick="pagarPrestamo('javier', ${i})">Pagar</button></div>`).join('')
+                : '<div class="prestamo-item">Sin préstamos</div>';
+            document.getElementById('prestamosToshioLista').innerHTML = estado.prestamos.toshio.length
+                ? estado.prestamos.toshio.map((p, i) => `<div class="prestamo-item"><span>${p.fecha} - $${p.monto.toFixed(2)}</span><button class="btn-pagar-prestamo" onclick="pagarPrestamo('toshio', ${i})">Pagar</button></div>`).join('')
+                : '<div class="prestamo-item">Sin préstamos</div>';
+            document.getElementById('prestamosOtrosLista').innerHTML = estado.prestamos.otros.length
+                ? estado.prestamos.otros.map((p, i) => `<div class="prestamo-item"><span>${p.nombre} - ${p.fecha} - $${p.monto.toFixed(2)}</span><button class="btn-pagar-prestamo" onclick="pagarPrestamo('otros', ${i})">Pagar</button></div>`).join('')
+                : '<div class="prestamo-item">Sin préstamos</div>';
+
+            // Gráfica
+            const maxValor = Math.max(totalDepositos, estado.gastos.total, totalAhorros) || 1;
+            const alturaMaxima = 150;
+            document.getElementById('barraDepositos').style.height = (totalDepositos / maxValor) * alturaMaxima + 'px';
+            document.getElementById('barraGastos').style.height = (estado.gastos.total / maxValor) * alturaMaxima + 'px';
+            document.getElementById('barraAhorros').style.height = (totalAhorros / maxValor) * alturaMaxima + 'px';
+            document.getElementById('totalDepositos').textContent = `$${totalDepositos.toFixed(2)}`;
+            document.getElementById('totalGastosGrafica').textContent = `$${estado.gastos.total.toFixed(2)}`;
+            document.getElementById('totalAhorrosGrafica').textContent = `$${totalAhorros.toFixed(2)}`;
+
+            // Pendientes de meses anteriores
+            const pendientesContainer = document.getElementById('pendientesContainer');
+            if (estado.pendientesMesesAnteriores.length > 0) {
+                document.getElementById('pagosPendientesSection').style.display = 'block';
+                pendientesContainer.innerHTML = estado.pendientesMesesAnteriores.map(p => `
+                    <div class="pendiente-card">
+                        <div class="pendiente-info">
+                            <h4>${p.nombre}</h4>
+                            <div class="monto">$${p.monto.toFixed(2)}</div>
+                            <div>Pendiente de mes anterior</div>
+                        </div>
+                        <button class="btn-pagar-pendiente" onclick="pagarPendiente('${p.concepto}')">Pagar</button>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('pagosPendientesSection').style.display = 'none';
+            }
+
+            // Historial de cierres
+            const historialContainer = document.getElementById('historialContainer');
+            historialContainer.innerHTML = estado.historialCierres.slice().reverse().map(h => `
+                <div class="historial-card">
+                    <h4>${h.mes} ${h.año}</h4>
+                    <div class="historial-detalle">💰 Depósitos: $${h.totalDepositos.toFixed(2)}</div>
+                    <div class="historial-detalle">💸 Gastos: $${h.totalGastos.toFixed(2)}</div>
+                    <div class="historial-detalle">💰 Ahorros: $${h.totalAhorros.toFixed(2)}</div>
+                    <div class="historial-detalle">💰 Préstamos: $${h.totalPrestamos.toFixed(2)}</div>
+                    <div class="historial-detalle">🏦 Saldo final: $${h.saldoFinal.toFixed(2)}</div>
+                    <details>
+                        <summary>Ver conceptos</summary>
+                        ${h.detallesConceptos.map(d => `<div>${d.concepto}: pagado $${d.pagado.toFixed(2)} (${d.diferencia > 0 ? '+' : ''}${d.diferencia.toFixed(2)})</div>`).join('')}
+                    </details>
+                </div>
+            `).join('') || '<p>No hay cierres anteriores</p>';
+
+            // Resumen de conceptos con alerta de 20%
+            const conceptosResumen = document.getElementById('conceptosResumen');
+            conceptosResumen.innerHTML = Object.entries(GASTOS_FIJOS).map(([key, gasto]) => {
+                const concepto = estado.conceptos[key] || { pagado: 0, diferencia: 0 };
+                const pagado = concepto.pagado || 0;
+                const clase = pagado >= gasto.montoMensual ? 'pagado-completo' : (pagado > 0 ? 'con-excedente' : 'faltante');
+                const porcentaje = totalDepositos > 0 ? (pagado / totalDepositos) * 100 : 0;
+                const alerta = porcentaje > 20 ? '<span class="alerta-20">⚠️ >20%</span>' : '';
+                return `
+                    <div class="concepto-card ${clase}">
+                        <h4>${gasto.nombre} ${alerta}</h4>
+                        <div class="concepto-detalle"><span>Debe ser:</span><span>$${gasto.montoMensual.toFixed(2)}</span></div>
+                        <div class="concepto-detalle"><span>Pagado:</span><span>$${pagado.toFixed(2)}</span></div>
+                        <div class="concepto-detalle"><span>% del total:</span><span>${porcentaje.toFixed(1)}%</span></div>
+                        <div class="concepto-detalle ${concepto.diferencia > 0 ? 'text-success' : concepto.diferencia < 0 ? 'text-danger' : ''}">
+                            <span>Diferencia:</span><span>$${concepto.diferencia.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Resumen global
+            const resumenGlobal = document.getElementById('resumenGlobal');
+            resumenGlobal.innerHTML = `
+                <div class="resumen-item"><span>💰 Total Depositado:</span><span>$${totalDepositos.toFixed(2)}</span></div>
+                <div class="resumen-item"><span>💸 Total Gastado:</span><span>$${estado.gastos.total.toFixed(2)}</span></div>
+                <div class="resumen-item"><span>💰 Total Ahorrado:</span><span>$${totalAhorros.toFixed(2)}</span></div>
+                <div class="resumen-item"><span>💰 Total Préstamos:</span><span>$${(totalPrestamosJavier + totalPrestamosToshio + totalPrestamosOtros).toFixed(2)}</span></div>
+                <div class="resumen-item"><span>📊 Diferencia:</span><span class="${totalDepositos - estado.gastos.total >= 0 ? 'text-success' : 'text-danger'}">$${(totalDepositos - estado.gastos.total).toFixed(2)}</span></div>
+                <div class="resumen-total"><span>💰 Saldo Actual:</span><span>$${estado.saldoActual.toFixed(2)}</span></div>
+            `;
+
+            // Tabla de movimientos
+            const tbody = document.getElementById('movimientosBody');
+            tbody.innerHTML = '';
+            estado.movimientos.slice().reverse().forEach(m => {
+                const row = tbody.insertRow();
+                row.innerHTML = `<td>${m.fecha}</td><td>${m.tipo}</td><td>${m.concepto}</td><td>${m.detalle || '-'}</td><td>$${m.monto.toFixed(2)}</td><td>$${m.javier.toFixed(2)}</td><td>$${m.toshio.toFixed(2)}</td>`;
+            });
         }
     </script>
-
 </body>
 </html>
