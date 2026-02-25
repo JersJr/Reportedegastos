@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Gastos - Javier & Toshio</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <style>
+        /* (todos los estilos se mantienen igual que en la versión anterior) */
         * {
             margin: 0;
             padding: 0;
@@ -1055,6 +1059,20 @@
     </div>
 
     <script>
+        // ==================== CONFIGURACIÓN DE FIREBASE ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVPmiQUJUlzHL1jJAn9i3Ml6qZLFDp8j4",
+            authDomain: "controldegastos-e3e16.firebaseapp.com",
+            projectId: "controldegastos-e3e16",
+            storageBucket: "controldegastos-e3e16.firebasestorage.app",
+            messagingSenderId: "944583581374",
+            appId: "1:944583581374:web:b0962f86f03d3b6b5508ef"
+        };
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const DOCUMENTO_UNICO = "datosCompartidos"; // Nombre del documento en Firestore
+
         // ==================== LOGIN ====================
         const USUARIOS = {
             javier: 'jav2385',
@@ -1098,7 +1116,7 @@
             document.getElementById('fechaPrestamo').value = hoy;
         };
 
-        // ==================== CONFIGURACIÓN ====================
+        // ==================== CONFIGURACIÓN DE GASTOS ====================
         const GASTOS_FIJOS = {
             casa: { nombre: 'Casa', javier: 50, toshio: 50, montoMensual: 233.87 },
             carro: { nombre: 'Carro', javier: 50, toshio: 50, montoMensual: 228 },
@@ -1127,7 +1145,7 @@
             prestamos: { javier: [], toshio: [], otros: [] },
             conceptos: {},
             pendientesMesesAnteriores: [],
-            historialCierres: [], // Nuevo array para guardar los resúmenes
+            historialCierres: [],
             movimientos: []
         };
 
@@ -1136,17 +1154,28 @@
             estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
         });
 
-        // ==================== FUNCIONES DE PERSISTENCIA ====================
+        // ==================== FUNCIONES DE FIRESTORE ====================
         function cargarDatos() {
-            const guardado = localStorage.getItem('controlGastosV12');
-            if (guardado) {
-                estado = JSON.parse(guardado);
-                actualizarUI();
-            }
+            db.collection('gastos').doc(DOCUMENTO_UNICO).get().then((doc) => {
+                if (doc.exists) {
+                    estado = doc.data();
+                    actualizarUI();
+                } else {
+                    // Si no existe, guardar el estado inicial
+                    guardarDatos();
+                }
+            }).catch((error) => {
+                console.error("Error al cargar datos:", error);
+                alert("Error al conectar con Firebase. Verifica tu conexión.");
+            });
         }
 
         function guardarDatos() {
-            localStorage.setItem('controlGastosV12', JSON.stringify(estado));
+            db.collection('gastos').doc(DOCUMENTO_UNICO).set(estado)
+                .catch((error) => {
+                    console.error("Error al guardar datos:", error);
+                    alert("Error al guardar en Firebase. Revisa la consola.");
+                });
         }
 
         // ==================== FUNCIONES DE INTERFAZ ====================
