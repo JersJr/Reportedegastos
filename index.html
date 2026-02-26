@@ -4,26 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Gastos - Javier & Toshio (Supabase)</title>
-    <!-- Estilos (igual que antes) -->
     <style>
+        /* ========== ESTILOS COMPLETOS (sin cambios) ========== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-
         h1 {
             color: white;
             text-align: center;
@@ -31,7 +28,6 @@
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
         /* Login */
         .login-container {
             background: white;
@@ -42,12 +38,10 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             text-align: center;
         }
-
         .login-container h2 {
             margin-bottom: 20px;
             color: #333;
         }
-
         .login-container input {
             width: 100%;
             padding: 12px;
@@ -56,7 +50,6 @@
             border-radius: 8px;
             font-size: 1em;
         }
-
         .login-container button {
             width: 100%;
             padding: 12px;
@@ -68,21 +61,17 @@
             cursor: pointer;
             margin-top: 10px;
         }
-
         .login-container button:hover {
             transform: scale(1.02);
         }
-
         .error {
             color: #dc3545;
             margin-top: 10px;
         }
-
         /* Contenido principal */
         #mainContent {
             display: none;
         }
-
         .logout-btn {
             background: #dc3545;
             color: white;
@@ -93,11 +82,9 @@
             float: right;
             margin-bottom: 20px;
         }
-
         .logout-btn:hover {
             transform: scale(1.05);
         }
-
         /* Tarjetas de saldo */
         .saldos-principales {
             display: grid;
@@ -105,7 +92,6 @@
             gap: 20px;
             margin-bottom: 30px;
         }
-
         .saldo-card {
             background: white;
             border-radius: 15px;
@@ -114,47 +100,39 @@
             text-align: center;
             transition: transform 0.3s;
         }
-
         .saldo-card:hover {
             transform: translateY(-5px);
         }
-
         .saldo-card.javier { border-top: 5px solid #667eea; }
         .saldo-card.toshio { border-top: 5px solid #f093fb; }
         .saldo-card.conjunto { border-top: 5px solid #4facfe; }
         .saldo-card.ahorros { border-top: 5px solid #ffc107; }
-
         .saldo-card h3 {
             color: #333;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
-
         .saldo-card .monto {
             font-size: 2em;
             font-weight: bold;
             margin-bottom: 15px;
         }
-
         .detalles-saldos {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             font-size: 0.9em;
         }
-
         .detalle-item {
             padding: 8px;
             background: #f5f5f5;
             border-radius: 8px;
         }
-
         .detalle-item .label {
             display: block;
             font-weight: bold;
             color: #333;
         }
-
         /* Monto inicial */
         .monto-inicial-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -167,13 +145,11 @@
             align-items: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-
         .monto-inicial-input {
             display: flex;
             gap: 15px;
             align-items: center;
         }
-
         .monto-inicial-input input {
             padding: 12px;
             border: none;
@@ -181,7 +157,6 @@
             font-size: 1.1em;
             width: 200px;
         }
-
         .monto-inicial-input button {
             padding: 12px 30px;
             background: white;
@@ -193,21 +168,17 @@
             cursor: pointer;
             transition: transform 0.3s;
         }
-
         .monto-inicial-input button:hover {
             transform: scale(1.05);
         }
-
         .monto-inicial-input button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-
         .monto-fijo {
             font-size: 1.3em;
             font-weight: bold;
         }
-
         /* Pagos Pendientes */
         .pagos-pendientes {
             background: #fff3cd;
@@ -217,7 +188,6 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .pagos-pendientes h2 {
             color: #856404;
             margin-bottom: 20px;
@@ -225,13 +195,11 @@
             align-items: center;
             gap: 10px;
         }
-
         .pendientes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
-
         .pendiente-card {
             background: white;
             border-radius: 10px;
@@ -241,18 +209,15 @@
             align-items: center;
             border-left: 5px solid #dc3545;
         }
-
         .pendiente-info h4 {
             color: #333;
             margin-bottom: 5px;
         }
-
         .pendiente-info .monto {
             color: #dc3545;
             font-weight: bold;
             font-size: 1.2em;
         }
-
         .btn-pagar-pendiente {
             background: #28a745;
             color: white;
@@ -262,11 +227,9 @@
             cursor: pointer;
             transition: transform 0.3s;
         }
-
         .btn-pagar-pendiente:hover {
             transform: scale(1.05);
         }
-
         /* Ahorros Individuales */
         .ahorros-individuales {
             background: white;
@@ -275,47 +238,39 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .ahorros-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
-
         .ahorro-card {
             padding: 20px;
             border-radius: 10px;
             text-align: center;
         }
-
         .ahorro-card.javier { background: rgba(102, 126, 234, 0.1); border: 2px solid #667eea; }
         .ahorro-card.toshio { background: rgba(240, 147, 251, 0.1); border: 2px solid #f093fb; }
-
         .ahorro-card h4 {
             margin-bottom: 15px;
             font-size: 1.2em;
         }
-
         .ahorro-card .monto-ahorro {
             font-size: 2.5em;
             font-weight: bold;
             margin-bottom: 15px;
         }
-
         .ahorro-control {
             display: flex;
             gap: 10px;
             margin-top: 15px;
         }
-
         .ahorro-control input {
             flex: 1;
             padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
         }
-
         .ahorro-control button {
             padding: 10px 20px;
             border: none;
@@ -325,10 +280,8 @@
             cursor: pointer;
             transition: transform 0.3s;
         }
-
         .ahorro-control button.javier { background: #667eea; }
         .ahorro-control button.toshio { background: #f093fb; }
-
         /* Préstamos */
         .prestamos-section {
             background: white;
@@ -337,48 +290,40 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .prestamos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
-
         .prestamo-card {
             padding: 15px;
             border-radius: 10px;
             background: #f8f9fa;
         }
-
         .prestamo-card.javier { border-left: 5px solid #667eea; }
         .prestamo-card.toshio { border-left: 5px solid #f093fb; }
         .prestamo-card.otros { border-left: 5px solid #6f42c1; }
-
         .prestamo-card h4 {
             margin-bottom: 10px;
             color: #333;
         }
-
         .prestamo-total {
             font-size: 1.3em;
             font-weight: bold;
             margin-bottom: 10px;
         }
-
         .prestamo-lista {
             max-height: 150px;
             overflow-y: auto;
             font-size: 0.9em;
         }
-
         .prestamo-item {
             display: flex;
             justify-content: space-between;
             padding: 5px 0;
             border-bottom: 1px solid #dee2e6;
         }
-
         .btn-pagar-prestamo {
             background: #28a745;
             color: white;
@@ -389,7 +334,6 @@
             cursor: pointer;
             margin-left: 5px;
         }
-
         /* Formulario principal */
         .formulario-principal {
             background: white;
@@ -398,7 +342,6 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .tipo-movimiento {
             display: flex;
             gap: 20px;
@@ -407,7 +350,6 @@
             background: #f5f5f5;
             border-radius: 10px;
         }
-
         .tipo-btn {
             flex: 1;
             padding: 15px;
@@ -420,35 +362,29 @@
             background: white;
             color: #333;
         }
-
         .tipo-btn.activo {
             color: white;
             transform: scale(1.02);
         }
-
         .tipo-btn.deposito.activo { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
         .tipo-btn.pago.activo { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
         .tipo-btn.banco.activo { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
         .tipo-btn.prestamo.activo { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
-
         .campos-movimiento {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
         }
-
         .campo-group {
             display: flex;
             flex-direction: column;
         }
-
         .campo-group label {
             font-weight: bold;
             margin-bottom: 8px;
             color: #555;
         }
-
         .campo-group select, .campo-group input {
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -456,7 +392,6 @@
             font-size: 1em;
             width: 100%;
         }
-
         .btn-registrar {
             width: 100%;
             padding: 15px;
@@ -468,16 +403,13 @@
             cursor: pointer;
             transition: transform 0.3s;
         }
-
         .btn-registrar.deposito { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
         .btn-registrar.pago { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
         .btn-registrar.banco { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
         .btn-registrar.prestamo { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
-
         .btn-registrar:hover {
             transform: translateY(-2px);
         }
-
         /* Gráfica */
         .grafica-section {
             background: white;
@@ -486,7 +418,6 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .grafica-container {
             display: flex;
             justify-content: space-around;
@@ -497,14 +428,12 @@
             background: #f8f9fa;
             border-radius: 10px;
         }
-
         .barra-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100px;
         }
-
         .barra {
             width: 50px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -512,46 +441,38 @@
             transition: height 0.3s;
             position: relative;
         }
-
         .barra.depositos { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
         .barra.gastos { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }
         .barra.ahorros { background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); }
-
         .barra-label {
             margin-top: 10px;
             font-weight: bold;
             color: #333;
         }
-
         .barra-valor {
             margin-top: 5px;
             font-size: 0.9em;
             color: #666;
         }
-
         .leyenda {
             display: flex;
             justify-content: center;
             gap: 30px;
             margin-top: 20px;
         }
-
         .leyenda-item {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         .leyenda-color {
             width: 20px;
             height: 20px;
             border-radius: 5px;
         }
-
         .leyenda-color.depositos { background: #28a745; }
         .leyenda-color.gastos { background: #dc3545; }
         .leyenda-color.ahorros { background: #ffc107; }
-
         /* Historial de cierres */
         .historial-section {
             background: white;
@@ -560,31 +481,26 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .historial-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-
         .historial-card {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 15px;
             border-left: 5px solid #4facfe;
         }
-
         .historial-card h4 {
             margin-bottom: 10px;
             color: #333;
         }
-
         .historial-detalle {
             font-size: 0.9em;
             margin: 5px 0;
         }
-
         /* Resumen mensual */
         .resumen-mensual {
             background: white;
@@ -593,43 +509,36 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
         .resumen-detalle {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 20px;
             margin-top: 20px;
         }
-
         .conceptos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
         }
-
         .concepto-card {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 15px;
             border-left: 5px solid #6c757d;
         }
-
         .concepto-card.pagado-completo { border-left-color: #28a745; }
         .concepto-card.con-excedente { border-left-color: #ffc107; }
         .concepto-card.faltante { border-left-color: #dc3545; }
-
         .concepto-card h4 {
             margin-bottom: 10px;
             color: #333;
         }
-
         .concepto-detalle {
             display: flex;
             justify-content: space-between;
             margin: 5px 0;
             font-size: 0.95em;
         }
-
         .alerta-20 {
             background: #fff3cd;
             color: #856404;
@@ -637,20 +546,17 @@
             border-radius: 3px;
             font-weight: bold;
         }
-
         .resumen-global {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
         }
-
         .resumen-item {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #dee2e6;
         }
-
         .resumen-total {
             display: flex;
             justify-content: space-between;
@@ -659,7 +565,6 @@
             font-size: 1.2em;
             border-top: 2px solid #333;
         }
-
         /* Tabla de movimientos */
         .tabla-gastos {
             background: white;
@@ -669,27 +574,22 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow-x: auto;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
-
         th {
             background: #f5f5f5;
             font-weight: bold;
         }
-
         .oculto {
             display: none !important;
         }
-
         .text-success { color: #28a745; }
         .text-danger { color: #dc3545; }
         .text-warning { color: #ffc107; }
@@ -1058,12 +958,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ==================== CONFIGURACIÓN SUPABASE ====================
+        // ==================== CONFIGURACIÓN SUPABASE (CORREGIDA) ====================
         const SUPABASE_URL = 'https://qwwvjtkuqekoxoqpviyl.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_BBMyaY7VMfbbjrp8UtV01A_QTNaRDE-';
         
-        // Inicializar cliente de Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Usamos un nombre diferente para evitar conflicto con la variable global de la librería
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ==================== LOGIN ====================
         const USUARIOS = {
@@ -1078,7 +978,7 @@
                 localStorage.setItem('loggedUser', user);
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
-                cargarDatos();
+                cargarDatos(); // Intentar cargar datos de Supabase
             } else {
                 document.getElementById('loginError').innerText = 'Usuario o contraseña incorrectos';
             }
@@ -1146,10 +1046,10 @@
             estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
         });
 
-        // ==================== FUNCIONES DE SUPABASE ====================
+        // ==================== FUNCIONES DE SUPABASE (usando supabaseClient) ====================
         async function cargarDatos() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('gastos')
                     .select('*')
                     .eq('id', 'estado_actual')
@@ -1182,7 +1082,7 @@
         async function guardarDatos() {
             try {
                 // Guardar en Supabase
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('gastos')
                     .upsert({ 
                         id: 'estado_actual', 
@@ -1220,7 +1120,7 @@
             document.getElementById('nombrePrestamoField').style.display = tipo === 'otros' ? 'block' : 'none';
         }
 
-        // ==================== FUNCIONES DE NEGOCIO ====================
+        // ==================== FUNCIONES DE NEGOCIO (todas usan guardarDatos) ====================
         async function establecerMontoInicial() {
             if (estado.montoInicial > 0) {
                 alert('El monto inicial ya fue establecido y no se puede modificar');
