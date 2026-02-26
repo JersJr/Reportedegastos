@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Gastos - Javier & Toshio</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <title>Control de Gastos - Javier & Toshio (Supabase)</title>
+    <!-- Estilos (igual que antes) -->
     <style>
-        /* (todos los estilos se mantienen igual que en la versión anterior) */
         * {
             margin: 0;
             padding: 0;
@@ -81,12 +78,11 @@
             margin-top: 10px;
         }
 
-        /* Contenido principal (oculto hasta login) */
+        /* Contenido principal */
         #mainContent {
             display: none;
         }
 
-        /* Logout */
         .logout-btn {
             background: #dc3545;
             color: white;
@@ -212,7 +208,7 @@
             font-weight: bold;
         }
 
-        /* Pagos Pendientes de MESES ANTERIORES */
+        /* Pagos Pendientes */
         .pagos-pendientes {
             background: #fff3cd;
             border: 2px solid #ffc107;
@@ -271,7 +267,7 @@
             transform: scale(1.05);
         }
 
-        /* Sección de Ahorros Individuales */
+        /* Ahorros Individuales */
         .ahorros-individuales {
             background: white;
             border-radius: 15px;
@@ -333,7 +329,7 @@
         .ahorro-control button.javier { background: #667eea; }
         .ahorro-control button.toshio { background: #f093fb; }
 
-        /* Sección de Préstamos */
+        /* Préstamos */
         .prestamos-section {
             background: white;
             border-radius: 15px;
@@ -482,7 +478,7 @@
             transform: translateY(-2px);
         }
 
-        /* Gráfica de comparación */
+        /* Gráfica */
         .grafica-section {
             background: white;
             border-radius: 15px;
@@ -556,7 +552,7 @@
         .leyenda-color.gastos { background: #dc3545; }
         .leyenda-color.ahorros { background: #ffc107; }
 
-        /* Historial de Cierres */
+        /* Historial de cierres */
         .historial-section {
             background: white;
             border-radius: 15px;
@@ -589,7 +585,7 @@
             margin: 5px 0;
         }
 
-        /* Resumen Mensual */
+        /* Resumen mensual */
         .resumen-mensual {
             background: white;
             border-radius: 15px;
@@ -942,7 +938,7 @@
                     </div>
                     <div class="campo-group">
                         <label>🏦 Tipo:</label>
-                        <select id="tipoBanco" onchange="toggleBancoField()">
+                        <select id="tipoBanco">
                             <option value="interes">💰 Interés (Aumenta saldo)</option>
                             <option value="gasto">💸 Gasto Bancario (Disminuye saldo)</option>
                         </select>
@@ -1058,20 +1054,16 @@
         </div>
     </div>
 
+    <!-- Incluir Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // ==================== CONFIGURACIÓN DE FIREBASE ====================
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVPmiQUJUlzHL1jJAn9i3Ml6qZLFDp8j4",
-            authDomain: "controldegastos-e3e16.firebaseapp.com",
-            projectId: "controldegastos-e3e16",
-            storageBucket: "controldegastos-e3e16.firebasestorage.app",
-            messagingSenderId: "944583581374",
-            appId: "1:944583581374:web:b0962f86f03d3b6b5508ef"
-        };
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const DOCUMENTO_UNICO = "datosCompartidos"; // Nombre del documento en Firestore
+        // ==================== CONFIGURACIÓN SUPABASE ====================
+        const SUPABASE_URL = 'https://qwwvjtkuqekoxoqpviyl.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_BBMyaY7VMfbbjrp8UtV01A_QTNaRDE-';
+        
+        // Inicializar cliente de Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ==================== LOGIN ====================
         const USUARIOS = {
@@ -1154,28 +1146,59 @@
             estado.conceptos[concepto] = { pagado: 0, diferencia: 0 };
         });
 
-        // ==================== FUNCIONES DE FIRESTORE ====================
-        function cargarDatos() {
-            db.collection('gastos').doc(DOCUMENTO_UNICO).get().then((doc) => {
-                if (doc.exists) {
-                    estado = doc.data();
-                    actualizarUI();
-                } else {
-                    // Si no existe, guardar el estado inicial
-                    guardarDatos();
+        // ==================== FUNCIONES DE SUPABASE ====================
+        async function cargarDatos() {
+            try {
+                const { data, error } = await supabase
+                    .from('gastos')
+                    .select('*')
+                    .eq('id', 'estado_actual')
+                    .single();
+                
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        // No existe el registro, guardar estado inicial
+                        await guardarDatos();
+                        return;
+                    }
+                    throw error;
                 }
-            }).catch((error) => {
-                console.error("Error al cargar datos:", error);
-                alert("Error al conectar con Firebase. Verifica tu conexión.");
-            });
+                
+                if (data) {
+                    estado = data.estado;
+                }
+                actualizarUI();
+            } catch (error) {
+                console.error('Error al cargar de Supabase:', error);
+                // Si falla Supabase, intentamos con localStorage como respaldo
+                const local = localStorage.getItem('controlGastosBackup');
+                if (local) {
+                    estado = JSON.parse(local);
+                    actualizarUI();
+                }
+            }
         }
 
-        function guardarDatos() {
-            db.collection('gastos').doc(DOCUMENTO_UNICO).set(estado)
-                .catch((error) => {
-                    console.error("Error al guardar datos:", error);
-                    alert("Error al guardar en Firebase. Revisa la consola.");
-                });
+        async function guardarDatos() {
+            try {
+                // Guardar en Supabase
+                const { error } = await supabase
+                    .from('gastos')
+                    .upsert({ 
+                        id: 'estado_actual', 
+                        estado: estado,
+                        updated_at: new Date().toISOString()
+                    });
+                
+                if (error) throw error;
+                
+                // Backup en localStorage por si acaso
+                localStorage.setItem('controlGastosBackup', JSON.stringify(estado));
+            } catch (error) {
+                console.error('Error al guardar en Supabase:', error);
+                // Fallback a localStorage
+                localStorage.setItem('controlGastosBackup', JSON.stringify(estado));
+            }
         }
 
         // ==================== FUNCIONES DE INTERFAZ ====================
@@ -1192,14 +1215,13 @@
             else if (tipo === 'prestamo') document.getElementById('camposPrestamo').classList.remove('oculto');
         }
 
-        function toggleBancoField() {}
         function togglePrestamoField() {
             const tipo = document.getElementById('tipoPrestamo').value;
             document.getElementById('nombrePrestamoField').style.display = tipo === 'otros' ? 'block' : 'none';
         }
 
         // ==================== FUNCIONES DE NEGOCIO ====================
-        function establecerMontoInicial() {
+        async function establecerMontoInicial() {
             if (estado.montoInicial > 0) {
                 alert('El monto inicial ya fue establecido y no se puede modificar');
                 return;
@@ -1213,12 +1235,12 @@
             estado.saldoActual = monto;
             document.getElementById('btnEstablecerMonto').disabled = true;
             document.getElementById('montoInicial').disabled = true;
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             alert('Saldo inicial establecido correctamente');
         }
 
-        function registrarDeposito() {
+        async function registrarDeposito() {
             if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
             const fecha = document.getElementById('fechaDeposito').value;
             const persona = document.getElementById('personaDeposito').value;
@@ -1241,13 +1263,13 @@
                 javier: persona === 'javier' ? monto : 0,
                 toshio: persona === 'toshio' ? monto : 0
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             document.getElementById('montoDeposito').value = '';
             alert('Depósito registrado');
         }
 
-        function registrarPago() {
+        async function registrarPago() {
             if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
             const fecha = document.getElementById('fechaPago').value;
             const concepto = document.getElementById('conceptoPago').value;
@@ -1266,13 +1288,13 @@
                 javier: (gasto.javier / 100) * monto,
                 toshio: (gasto.toshio / 100) * monto
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             document.getElementById('montoPago').value = '';
             alert('Pago registrado');
         }
 
-        function registrarBanco() {
+        async function registrarBanco() {
             if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
             const fecha = document.getElementById('fechaBanco').value;
             const tipo = document.getElementById('tipoBanco').value;
@@ -1286,13 +1308,13 @@
                 estado.saldoActual -= monto;
                 estado.movimientos.push({ fecha, tipo: 'GASTO BANCARIO', concepto: 'Gasto', detalle: '➖ Disminuye', monto, javier: 0, toshio: 0 });
             }
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             document.getElementById('montoBanco').value = '';
             alert('Movimiento bancario registrado');
         }
 
-        function registrarPrestamo() {
+        async function registrarPrestamo() {
             if (estado.montoInicial === 0) { alert('Primero establezca el saldo inicial'); return; }
             const fecha = document.getElementById('fechaPrestamo').value;
             const tipo = document.getElementById('tipoPrestamo').value;
@@ -1313,7 +1335,7 @@
                 javier: tipo === 'javier' ? monto : 0,
                 toshio: tipo === 'toshio' ? monto : 0
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             document.getElementById('montoPrestamo').value = '';
             document.getElementById('nombrePrestamo').value = '';
@@ -1321,7 +1343,7 @@
             alert('Préstamo registrado');
         }
 
-        function pagarPrestamo(tipo, index) {
+        async function pagarPrestamo(tipo, index) {
             let prestamo;
             if (tipo === 'javier') { prestamo = estado.prestamos.javier[index]; estado.prestamos.javier.splice(index, 1); }
             else if (tipo === 'toshio') { prestamo = estado.prestamos.toshio[index]; estado.prestamos.toshio.splice(index, 1); }
@@ -1336,12 +1358,12 @@
                 javier: tipo === 'javier' ? prestamo.monto : 0,
                 toshio: tipo === 'toshio' ? prestamo.monto : 0
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             alert('Pago de préstamo registrado');
         }
 
-        function pagarPendiente(concepto) {
+        async function pagarPendiente(concepto) {
             const gasto = GASTOS_FIJOS[concepto];
             const pendiente = estado.pendientesMesesAnteriores.find(p => p.concepto === concepto);
             if (!pendiente) return;
@@ -1361,12 +1383,12 @@
                 javier: (gasto.javier / 100) * montoPagar,
                 toshio: (gasto.toshio / 100) * montoPagar
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             alert(`Pago de ${gasto.nombre} de mes anterior realizado`);
         }
 
-        function retirarAhorroIndividual(persona) {
+        async function retirarAhorroIndividual(persona) {
             let monto, input;
             if (persona === 'javier') {
                 input = document.getElementById('retiroJavier');
@@ -1392,14 +1414,13 @@
                 javier: persona === 'javier' ? monto : 0,
                 toshio: persona === 'toshio' ? monto : 0
             });
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
             input.value = '';
             alert(`Retiro de ahorro de ${persona} realizado`);
         }
 
-        // Cerrar mes con guardado en historial
-        function cerrarMes() {
+        async function cerrarMes() {
             const mes = prompt("Ingrese el mes que está cerrando (ejemplo: 1 para Enero, 2 para Febrero, etc.):");
             if (!mes) return;
             const año = prompt("Ingrese el año (ejemplo: 2025):");
@@ -1429,7 +1450,6 @@
             });
             estado.pendientesMesesAnteriores = noPagados;
 
-            // Crear objeto resumen para historial
             const resumenHistorial = {
                 fecha: new Date().toISOString(),
                 mes: mesNombre,
@@ -1447,7 +1467,6 @@
             };
             estado.historialCierres.push(resumenHistorial);
 
-            // Resumen para mostrar en alert
             const resumen = `
 📊 CIERRE DE MES: ${mesNombre} ${año}
 
@@ -1481,7 +1500,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
             `;
             alert(resumen);
 
-            // Reiniciar para el nuevo mes
             estado.depositos.javier = 0;
             estado.depositos.toshio = 0;
             estado.gastos.total = 0;
@@ -1491,7 +1509,7 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
             });
             estado.montoInicial = estado.saldoActual;
 
-            guardarDatos();
+            await guardarDatos();
             actualizarUI();
         }
 
@@ -1503,7 +1521,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
             const totalPrestamosOtros = estado.prestamos.otros.reduce((s, p) => s + p.monto, 0);
             const disponibleGastos = estado.saldoActual - totalAhorros;
 
-            // Tarjetas
             document.getElementById('montoFijoDisplay').textContent = `$${estado.montoInicial.toFixed(2)}`;
             document.getElementById('saldoJavier').textContent = `$${(estado.depositos.javier - TOTALES_PERSONA.javier + estado.ahorro.javier).toFixed(2)}`;
             document.getElementById('depositadoJavier').textContent = `$${estado.depositos.javier.toFixed(2)}`;
@@ -1521,16 +1538,13 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
             document.getElementById('ahorroJavierTotal').textContent = `$${estado.ahorro.javier.toFixed(2)}`;
             document.getElementById('ahorroToshioTotal').textContent = `$${estado.ahorro.toshio.toFixed(2)}`;
 
-            // Ahorros individuales
             document.getElementById('ahorroJavierIndividual').textContent = `$${estado.ahorro.javier.toFixed(2)}`;
             document.getElementById('ahorroToshioIndividual').textContent = `$${estado.ahorro.toshio.toFixed(2)}`;
 
-            // Préstamos totales
             document.getElementById('prestamosJavierTotal').textContent = `$${totalPrestamosJavier.toFixed(2)}`;
             document.getElementById('prestamosToshioTotal').textContent = `$${totalPrestamosToshio.toFixed(2)}`;
             document.getElementById('prestamosOtrosTotal').textContent = `$${totalPrestamosOtros.toFixed(2)}`;
 
-            // Listas de préstamos
             document.getElementById('prestamosJavierLista').innerHTML = estado.prestamos.javier.length 
                 ? estado.prestamos.javier.map((p, i) => `<div class="prestamo-item"><span>${p.fecha} - $${p.monto.toFixed(2)}</span><button class="btn-pagar-prestamo" onclick="pagarPrestamo('javier', ${i})">Pagar</button></div>`).join('')
                 : '<div class="prestamo-item">Sin préstamos</div>';
@@ -1541,7 +1555,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
                 ? estado.prestamos.otros.map((p, i) => `<div class="prestamo-item"><span>${p.nombre} - ${p.fecha} - $${p.monto.toFixed(2)}</span><button class="btn-pagar-prestamo" onclick="pagarPrestamo('otros', ${i})">Pagar</button></div>`).join('')
                 : '<div class="prestamo-item">Sin préstamos</div>';
 
-            // Gráfica
             const maxValor = Math.max(totalDepositos, estado.gastos.total, totalAhorros) || 1;
             const alturaMaxima = 150;
             document.getElementById('barraDepositos').style.height = (totalDepositos / maxValor) * alturaMaxima + 'px';
@@ -1551,7 +1564,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
             document.getElementById('totalGastosGrafica').textContent = `$${estado.gastos.total.toFixed(2)}`;
             document.getElementById('totalAhorrosGrafica').textContent = `$${totalAhorros.toFixed(2)}`;
 
-            // Pendientes de meses anteriores
             const pendientesContainer = document.getElementById('pendientesContainer');
             if (estado.pendientesMesesAnteriores.length > 0) {
                 document.getElementById('pagosPendientesSection').style.display = 'block';
@@ -1569,7 +1581,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
                 document.getElementById('pagosPendientesSection').style.display = 'none';
             }
 
-            // Historial de cierres
             const historialContainer = document.getElementById('historialContainer');
             historialContainer.innerHTML = estado.historialCierres.slice().reverse().map(h => `
                 <div class="historial-card">
@@ -1586,7 +1597,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
                 </div>
             `).join('') || '<p>No hay cierres anteriores</p>';
 
-            // Resumen de conceptos con alerta de 20%
             const conceptosResumen = document.getElementById('conceptosResumen');
             conceptosResumen.innerHTML = Object.entries(GASTOS_FIJOS).map(([key, gasto]) => {
                 const concepto = estado.conceptos[key] || { pagado: 0, diferencia: 0 };
@@ -1607,7 +1617,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
                 `;
             }).join('');
 
-            // Resumen global
             const resumenGlobal = document.getElementById('resumenGlobal');
             resumenGlobal.innerHTML = `
                 <div class="resumen-item"><span>💰 Total Depositado:</span><span>$${totalDepositos.toFixed(2)}</span></div>
@@ -1618,7 +1627,6 @@ ${noPagados.length ? noPagados.map(p => `   ${p.nombre}: $${p.monto.toFixed(2)}`
                 <div class="resumen-total"><span>💰 Saldo Actual:</span><span>$${estado.saldoActual.toFixed(2)}</span></div>
             `;
 
-            // Tabla de movimientos
             const tbody = document.getElementById('movimientosBody');
             tbody.innerHTML = '';
             estado.movimientos.slice().reverse().forEach(m => {
